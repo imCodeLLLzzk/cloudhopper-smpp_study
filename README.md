@@ -1,2 +1,8 @@
-# cloudhopper-smpp_study
-基于smpp的交互
+Cloudhopper SMPP by Twitter 
+============================
+
+This project has moved to https://github.com/fizzed/cloudhopper-smpp
+
+Twitter still uses the library, but its now maintained by [Fizzed, Inc.](http://fizzed.com)
+
+This repo lives on merely for legacy access.
