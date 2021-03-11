@@ -27,17 +27,10 @@ import com.cloudhopper.smpp.SmppSession;
 import com.cloudhopper.smpp.SmppSessionConfiguration;
 import com.cloudhopper.smpp.impl.DefaultSmppServer;
 import com.cloudhopper.smpp.impl.DefaultSmppSessionHandler;
-import com.cloudhopper.smpp.pdu.BaseBind;
-import com.cloudhopper.smpp.pdu.BaseBindResp;
-import com.cloudhopper.smpp.pdu.BaseSm;
-import com.cloudhopper.smpp.pdu.PduRequest;
-import com.cloudhopper.smpp.pdu.PduResponse;
+import com.cloudhopper.smpp.pdu.*;
 import com.cloudhopper.smpp.type.SmppProcessingException;
 import java.lang.ref.WeakReference;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +41,11 @@ import org.slf4j.LoggerFactory;
  */
 public class ServerMain {
     private static final Logger logger = LoggerFactory.getLogger(ServerMain.class);
+
+    private ExecutorService executorServiceForDR = Executors.newFixedThreadPool(50);
+
+    private ExecutorService executorServiceForPdu = Executors.newFixedThreadPool(50);
+
 
     static public void main(String[] args) throws Exception {
         //
@@ -76,8 +74,9 @@ public class ServerMain {
         
         // create a server configuration
         SmppServerConfiguration configuration = new SmppServerConfiguration();
-        //开放端口
+        //开放端口 配置连接信息，提供链接
         configuration.setPort(2776);
+//        configuration.setPort(3777);
         configuration.setMaxConnectionSize(10);
         configuration.setNonBlockingSocketsEnabled(true);
         configuration.setDefaultRequestExpiryTimeout(30000);
@@ -88,6 +87,7 @@ public class ServerMain {
         configuration.setJmxEnabled(true);
         
         // create a server, start it up
+        //创建一个SmppServer等待 客户端发起连接
         DefaultSmppServer smppServer = new DefaultSmppServer(configuration, new DefaultSmppServerHandler(), executor, monitorExecutor);
 
         logger.info("Starting SMPP server...");
@@ -111,20 +111,34 @@ public class ServerMain {
             // test name change of sessions
             // this name actually shows up as thread context....
             sessionConfiguration.setName("Application.SMPP." + sessionConfiguration.getSystemId());
+            logger.info("开始处理连接绑定请求");
 
             //throw new SmppProcessingException(SmppConstants.STATUS_BINDFAIL, null);
         }
 
+        /**
+         * 创建会话 ，EMCS与 SMSmap
+         * @param sessionId The unique numeric identifier assigned to the bind request.
+         *      Will be the same value between sessionBindRequested, sessionCreated,
+         *      and sessionDestroyed method calls.
+         * @param session The server session associated with the bind request and
+         *      underlying channel.
+         * @param preparedBindResponse The prepared bind response that will
+         *      eventually be returned to the client when "serverReady" is finally
+         *      called on the session.
+         * @throws SmppProcessingException
+         */
         @Override
         public void sessionCreated(Long sessionId, SmppServerSession session, BaseBindResp preparedBindResponse) throws SmppProcessingException {
-            logger.info("Session created: {}", session);
+            logger.info("连接成功，创建会话开始Session created: {}", session);
             // need to do something it now (flag we're ready)
+
             session.serverReady(new TestSmppSessionHandler(session));
         }
 
         @Override
         public void sessionDestroyed(Long sessionId, SmppServerSession session) {
-            logger.info("Session destroyed: {}", session);
+            logger.info("销毁会话，Session destroyed: {}", session);
             // print out final stats
             if (session.hasCounters()) {
                 logger.info(" final session rx-submitSM: {}", session.getCounters().getRxSubmitSM());
@@ -150,9 +164,9 @@ public class ServerMain {
             
             // mimic how long processing could take on a slower smsc
             try {
-                //Thread.sleep(50);
+                logger.info("监听到客户端Pdu请求，内容{}",pduRequest);
             } catch (Exception e) { }
-            
+
             return pduRequest.createResponse();
         }
     }

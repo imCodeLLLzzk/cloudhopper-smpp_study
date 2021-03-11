@@ -321,6 +321,7 @@ public class DefaultSmppSession implements SmppServerSession, SmppSessionChannel
             logger.error("{}", e);
         }
         // flag the channel is ready to read
+        //显示地说明当前 channel可用
         this.channel.setReadable(true).awaitUninterruptibly();
         this.setBound();
     }
@@ -435,7 +436,7 @@ public class DefaultSmppSession implements SmppServerSession, SmppSessionChannel
 
     @Override
     public EnquireLinkResp enquireLink(EnquireLink request, long timeoutInMillis) throws RecoverablePduException, UnrecoverablePduException, SmppTimeoutException, SmppChannelException, InterruptedException {
-        assertValidRequest(request);
+        assertValidRequest(request);//空对象校验
         PduResponse response = sendRequestAndGetResponse(request, timeoutInMillis);
         SmppSessionUtil.assertExpectedResponse(request, response);
         return (EnquireLinkResp)response;

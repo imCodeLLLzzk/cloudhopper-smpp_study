@@ -52,6 +52,7 @@ public class OutboundClient extends Client {
 
 	private volatile Integer connectionFailedTimes = 0;
 
+	// 用于维护 SMSC与ESME 之间的连接状态，检测另一端实体能否响应
 	public OutboundClient() {
 		this.enquireLinkExecutor = Executors.newScheduledThreadPool(1, new ThreadFactory() {
 

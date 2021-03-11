@@ -22,35 +22,28 @@ package com.cloudhopper.smpp.demo;
 
 import com.cloudhopper.commons.charset.CharsetUtil;
 import com.cloudhopper.commons.util.windowing.WindowFuture;
-import com.cloudhopper.smpp.SmppSessionConfiguration;
 import com.cloudhopper.smpp.SmppBindType;
 import com.cloudhopper.smpp.SmppSession;
+import com.cloudhopper.smpp.SmppSessionConfiguration;
 import com.cloudhopper.smpp.impl.DefaultSmppClient;
 import com.cloudhopper.smpp.impl.DefaultSmppSessionHandler;
+import com.cloudhopper.smpp.pdu.*;
 import com.cloudhopper.smpp.type.Address;
-import com.cloudhopper.smpp.pdu.EnquireLink;
-import com.cloudhopper.smpp.pdu.EnquireLinkResp;
-import com.cloudhopper.smpp.pdu.PduRequest;
-import com.cloudhopper.smpp.pdu.PduResponse;
-import com.cloudhopper.smpp.pdu.SubmitSm;
-import com.cloudhopper.smpp.pdu.SubmitSmResp;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author joelauer (twitter: @jjlauer or <a href="http://twitter.com/jjlauer" target=window>http://twitter.com/jjlauer</a>)
  */
-public class ClientMain {
-    private static final Logger logger = LoggerFactory.getLogger(ClientMain.class);
+public class ClientMain2 {
+    private static final Logger logger = LoggerFactory.getLogger(ClientMain2.class);
 
     static public void main(String[] args) throws Exception {
         //
@@ -97,16 +90,14 @@ public class ClientMain {
 
         SmppSessionConfiguration config0 = new SmppSessionConfiguration();
         config0.setWindowSize(1);
-        config0.setName("test-mk-91");
+        config0.setName("test-mk");
         config0.setType(SmppBindType.TRANSCEIVER);
-        config0.setSystemId("test-otp-91");
+        config0.setHost("127.0.0.1");
+        config0.setSystemId("test8");
         config0.setPassword("888888");
-        config0.setPort(8777);
-        config0.setHost("47.241.3.118");
-//        config0.setHost("47.241.76.189");
-//        config0.setPort(18777);
-//        config0.setSystemId("test-otp-52");
-//        config0.setPassword("888888");
+        config0.setPort(7776);
+//        config0.setHost("209.58.162.117");
+//        config0.setPort(3777);
 //        config0.setHost("smpp.messaging-service.com");
 //        config0.setPort(8888);
 //        config0.setSystemId("PaulKMI");
@@ -155,18 +146,18 @@ public class ClientMain {
             SubmitSm submit0 = new SubmitSm();
 
             for (int i = 1; i < 2; i++) {
-                String text160 = "test otp 12312";
+                String text160 = "hello 0224 111";
                 byte[] textBytes = CharsetUtil.encode(text160, CharsetUtil.CHARSET_GSM);
                 // add delivery receipt
                 //submit0.setRegisteredDelivery(SmppConstants.REGISTERED_DELIVERY_SMSC_RECEIPT_REQUESTED);
 
                 // address 包括发送方信息，接收方信息
-                submit0.setSourceAddress(new Address((byte) 0x03, (byte) 0x00, "testPC"));
+                submit0.setSourceAddress(new Address((byte) 0x01, (byte) 0x00, "haha"));
                 //submit0.setDestAddress(new Address((byte) 0x01, (byte) 0x01, toList.get(1)));//Tk
 
                 submit0.setShortMessage(textBytes);
                 //接收方号码
-                submit0.setDestAddress(new Address((byte) 0x01, (byte) 0x01, "00919582473834"));//Tk
+                submit0.setDestAddress(new Address((byte) 0x01, (byte) 0x01, "00919582473834111"));//Tk
                 //logger.info("sendWindow.size: {}", session0.getSendWindow().getSize());
                 SubmitSmResp submitResp = session0.submit(submit0, 10000);
                 logger.info("submitResponse:{}", submitResp);

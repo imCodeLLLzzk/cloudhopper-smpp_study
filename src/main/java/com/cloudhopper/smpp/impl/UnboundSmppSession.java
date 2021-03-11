@@ -65,7 +65,7 @@ public class UnboundSmppSession implements SmppSessionChannelListener {
     @Override
     public void firePduReceived(Pdu pdu) {
         // always log the PDU received on an unbound session
-        logger.info("received PDU: {}", pdu);
+        logger.info("未绑定会话，保持连接状态received PDU: {}", pdu);
 
         // only bind and enquire_link requests are permitted
         if (pdu instanceof BaseBind) {
@@ -101,6 +101,7 @@ public class UnboundSmppSession implements SmppSessionChannelListener {
 
             try {
                 // create a new a new session and tie the bind response to it
+                logger.info("创建会话");
                 server.createSession(sessionId, channel, sessionConfiguration, preparedBindResponse);
             } catch (SmppProcessingException e) {
                 logger.warn("Bind request was approved, but createSession failed for connection [{}] with error [{}]", channelName, e.getMessage());

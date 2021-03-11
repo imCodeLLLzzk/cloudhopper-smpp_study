@@ -191,9 +191,10 @@ public class DefaultSmppClient implements SmppClient {
         try {
             // connect to the remote system and create the session
             session = doOpen(config, sessionHandler);
-
+            logger.info("建立网络连接");
             // try to bind to the remote system (may throw an exception)
             doBind(session, config, sessionHandler);
+            logger.info("绑定");
         } finally {
             // close the session if we weren't able to bind correctly
             if (session != null && !session.isBound()) {

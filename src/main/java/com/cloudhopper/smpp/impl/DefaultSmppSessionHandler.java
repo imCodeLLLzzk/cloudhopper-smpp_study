@@ -65,12 +65,22 @@ public class DefaultSmppSessionHandler implements SmppSessionListener {
         logger.info("Default handling is to discard an unexpected channel closed");
     }
 
+    /**
+     * 从会话中接收请求数据单元
+     * 在建立起连接时 心跳机制也会触发此方法
+     * @param pduRequest The request PDU received on this session
+     * @return
+     */
     @Override
     public PduResponse firePduRequestReceived(PduRequest pduRequest) {
         logger.warn("Default handling is to discard unexpected request PDU: {}", pduRequest);
         return null;
     }
 
+    /**
+     * 期望
+     * @param pduAsyncResponse The "expected" response PDU received on this session
+     */
     @Override
     public void fireExpectedPduResponseReceived(PduAsyncResponse pduAsyncResponse) {
         logger.warn("Default handling is to discard expected response PDU: {}", pduAsyncResponse);
