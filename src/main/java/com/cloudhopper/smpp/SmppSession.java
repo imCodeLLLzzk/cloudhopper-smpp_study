@@ -41,6 +41,8 @@ import com.cloudhopper.smpp.type.UnrecoverablePduException;
  */
 public interface SmppSession {
 
+    void sendRequestPdu(PduResponse responsePdu) throws UnrecoverablePduException, RecoverablePduException, InterruptedException, SmppChannelException;
+
     /**
      * The type of SMPP session.  Will be either Server (SMSC) or Client (ESME).
      * Each side of the session has to be either one of these two.  It determines

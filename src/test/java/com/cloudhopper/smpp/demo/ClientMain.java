@@ -27,6 +27,7 @@ import com.cloudhopper.smpp.SmppBindType;
 import com.cloudhopper.smpp.SmppSession;
 import com.cloudhopper.smpp.impl.DefaultSmppClient;
 import com.cloudhopper.smpp.impl.DefaultSmppSessionHandler;
+import com.cloudhopper.smpp.tlv.Tlv;
 import com.cloudhopper.smpp.type.Address;
 import com.cloudhopper.smpp.pdu.EnquireLink;
 import com.cloudhopper.smpp.pdu.EnquireLinkResp;
@@ -97,13 +98,15 @@ public class ClientMain {
 
         SmppSessionConfiguration config0 = new SmppSessionConfiguration();
         config0.setWindowSize(1);
-        config0.setName("test-mk-91");
+        config0.setName("SMBPR22O");
         config0.setType(SmppBindType.TRANSCEIVER);
-        config0.setSystemId("test-otp-91");
-        config0.setPassword("888888");
-        config0.setPort(8777);
-        config0.setHost("47.241.3.118");
-//        config0.setHost("47.241.76.189");
+        config0.setSystemId("SMBPR22O");
+        config0.setPassword("eeeqxxtG@#");
+        config0.setPort(8888);
+        //91
+        config0.setHost("103.88.253.162");
+        //52
+        //config0.setHost("47.241.76.189");
 //        config0.setPort(18777);
 //        config0.setSystemId("test-otp-52");
 //        config0.setPassword("888888");
@@ -128,8 +131,7 @@ public class ClientMain {
             // socket, send the bind request, and wait for a bind response
             session0 = clientBootstrap.bind(config0, sessionHandler);
             logger.info("等待连接绑定响应---------------------------------------------------");
-            System.out.println("Press any key to send enquireLink #1");
-            System.in.read();
+//            //System.in.read();
 
             // demo of a "synchronous" enquireLink call - send it and wait for a response
             EnquireLinkResp enquireLinkResp1 = session0.enquireLink(new EnquireLink(), 10000);
@@ -155,19 +157,27 @@ public class ClientMain {
             SubmitSm submit0 = new SubmitSm();
 
             for (int i = 1; i < 2; i++) {
-                String text160 = "test otp 12312";
-                byte[] textBytes = CharsetUtil.encode(text160, CharsetUtil.CHARSET_GSM);
+                //TODO GSM编码格式不支持西班牙小语种的部分重读字符，CharsetUtil工具类目前能解析 à 无法解析 á，目前可通过查看GSMCharset 源码得知哪些字符可以正常解析
+                //UTF-8支持
+                String text160 = "Best color prediction game.Highest multiplier:1.9/4.4,and has 98% accurate team planning. Registration for free Rs100,click to contact me https://bit.ly/3v1UGiC";
+                byte[] textBytes = CharsetUtil.encode(text160, CharsetUtil.CHARSET_UTF_8);
                 // add delivery receipt
                 //submit0.setRegisteredDelivery(SmppConstants.REGISTERED_DELIVERY_SMSC_RECEIPT_REQUESTED);
 
                 // address 包括发送方信息，接收方信息
-                submit0.setSourceAddress(new Address((byte) 0x03, (byte) 0x00, "testPC"));
+                submit0.setSourceAddress(new Address((byte) 0x03, (byte) 0x00, "159483"));
                 //submit0.setDestAddress(new Address((byte) 0x01, (byte) 0x01, toList.get(1)));//Tk
 
                 submit0.setShortMessage(textBytes);
                 //接收方号码
-                submit0.setDestAddress(new Address((byte) 0x01, (byte) 0x01, "00919582473834"));//Tk
+                submit0.setDestAddress(new Address((byte) 0x01, (byte) 0x01, "919582473827"));//Tk
                 //logger.info("sendWindow.size: {}", session0.getSendWindow().getSize());
+                short pe_id  = 0x1400;
+                short template_id = 0x1401;
+                String entity_id_value = "12312312312368412";
+                String template_id_value = "yweyruywerywrewr";
+                submit0.addOptionalParameter(new Tlv(pe_id, CharsetUtil.encode(entity_id_value, CharsetUtil.CHARSET_GSM), ""));
+                submit0.addOptionalParameter(new Tlv(template_id, CharsetUtil.encode(template_id_value, CharsetUtil.CHARSET_GSM), ""));
                 SubmitSmResp submitResp = session0.submit(submit0, 10000);
                 logger.info("submitResponse:{}", submitResp);
             }

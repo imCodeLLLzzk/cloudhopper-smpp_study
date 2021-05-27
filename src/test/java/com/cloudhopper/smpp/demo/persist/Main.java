@@ -47,12 +47,12 @@ public class Main {
 
 		final ExecutorService executorService = Executors.newFixedThreadPool(10);
 
-		Scanner terminalInput = new Scanner(System.in);
+		//Scanner terminalInput = new Scanner(System.in);
 		while (true) {
-			String s = terminalInput.nextLine();
+			//String s = terminalInput.nextLine();
 			final long messagesToSend;
 			try {
-				messagesToSend = Long.parseLong(s);
+				messagesToSend = 4;
 			} catch (NumberFormatException e) {
 				break;
 			}
@@ -72,7 +72,7 @@ public class Main {
 
 									SubmitSm submit = new SubmitSm();
 									submit.setSourceAddress(new Address((byte) 0x03, (byte) 0x00, "40404"));
-									submit.setDestAddress(new Address((byte) 0x01, (byte) 0x01, "44555519205"));
+									submit.setDestAddress(new Address((byte) 0x01, (byte) 0x01, "009189999302692"));
 									submit.setRegisteredDelivery(SmppConstants.REGISTERED_DELIVERY_SMSC_RECEIPT_REQUESTED);
 									submit.setShortMessage(textBytes);
 									final SubmitSmResp submit1 = session.submit(submit, 10000);
@@ -109,10 +109,10 @@ public class Main {
 		config.setName("Tester.Session." + i);
 		config.setType(SmppBindType.TRANSCEIVER);
 		config.setHost("127.0.0.1");
-		config.setPort(2776);
+		config.setPort(7776);
 		config.setConnectTimeout(10000);
-		config.setSystemId("systemId" + i);
-		config.setPassword("password");
+		config.setSystemId("test");
+		config.setPassword("888888");
 		config.getLoggingOptions().setLogBytes(false);
 		// to enable monitoring (request expiration)
 

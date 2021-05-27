@@ -194,7 +194,40 @@ public class DefaultSmppSession implements SmppServerSession, SmppSessionChannel
             logger.error("Unable to unregister DefaultSmppServerMXBean [{}]", objectName, e);
         }
     }
-        
+
+    @Override
+    public void sendRequestPdu(PduResponse pdu) throws UnrecoverablePduException, RecoverablePduException, InterruptedException, SmppChannelException {
+        // assign the next PDU sequence # if its not yet assigned
+        if (!pdu.hasSequenceNumberAssigned()) {
+            pdu.setSequenceNumber(this.sequenceNumber.next());
+        }
+
+        if(this.sessionHandler instanceof SmppSessionListener) {
+            if(!((SmppSessionListener)this.sessionHandler).firePduDispatch(pdu)) {
+                logger.info("dispatched response PDU discarded: {}", pdu);
+                return;
+            }
+        }
+
+        // encode the pdu into a buffer
+        ChannelBuffer buffer = transcoder.encode(pdu);
+
+        // we need to log the PDU after encoding since some things only happen
+        // during the encoding process such as looking up the result message
+        if (configuration.getLoggingOptions().isLogPduEnabled()) {
+            logger.info("send PDU: {}", pdu);
+        }
+
+        // write the pdu out & wait timeout amount of time
+        ChannelFuture channelFuture = this.channel.write(buffer).await();
+
+        // check if the write was a success
+        if (!channelFuture.isSuccess()) {
+            // the write failed, make sure to throw an exception
+            throw new SmppChannelException(channelFuture.getCause().getMessage(), channelFuture.getCause());
+        }
+    }
+
     @Override
     public SmppBindType getBindType() {
         return this.configuration.getType();

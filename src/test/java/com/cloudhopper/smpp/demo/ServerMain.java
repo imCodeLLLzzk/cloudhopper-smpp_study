@@ -30,6 +30,7 @@ import com.cloudhopper.smpp.impl.DefaultSmppSessionHandler;
 import com.cloudhopper.smpp.pdu.*;
 import com.cloudhopper.smpp.type.SmppProcessingException;
 import java.lang.ref.WeakReference;
+import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
@@ -46,7 +47,11 @@ public class ServerMain {
 
     private ExecutorService executorServiceForPdu = Executors.newFixedThreadPool(50);
 
-
+    /**
+     * key smppSession
+     * value last heart or request timestamp
+     */
+    public static ConcurrentHashMap<SmppSession,Long> smppSessionEnquireLink = new ConcurrentHashMap();
     static public void main(String[] args) throws Exception {
         //
         // setup 3 things required for a server
@@ -149,6 +154,9 @@ public class ServerMain {
         }
 
     }
+    public static void putSessionEnquireLinkTime(SmppSession session) {
+        smppSessionEnquireLink.put(session,System.currentTimeMillis());
+    }
 
     public static class TestSmppSessionHandler extends DefaultSmppSessionHandler {
         
@@ -157,17 +165,31 @@ public class ServerMain {
         public TestSmppSessionHandler(SmppSession session) {
             this.sessionRef = new WeakReference<SmppSession>(session);
         }
+        @Override
+        public boolean firePduReceived(Pdu pdu) {
+            // default handling is to accept pdu for processing up chain
+            SmppSession session = sessionRef.get();
+            putSessionEnquireLinkTime(session);
+            return true;
+        }
+
         
         @Override
         public PduResponse firePduRequestReceived(PduRequest pduRequest) {
             SmppSession session = sessionRef.get();
-            
+            //返回MessageId
+            String messageId =  UUID.randomUUID().toString().replace("-","");
+            PduResponse responsePdu = pduRequest.createResponse();
+            if (responsePdu instanceof SubmitSmResp){
+            SubmitSmResp submitSmResp = ((SubmitSmResp) responsePdu);
+            submitSmResp.setMessageId(messageId);
+            }
             // mimic how long processing could take on a slower smsc
             try {
                 logger.info("监听到客户端Pdu请求，内容{}",pduRequest);
+                session.sendRequestPdu(responsePdu);
             } catch (Exception e) { }
-
-            return pduRequest.createResponse();
+            return null;
         }
     }
     

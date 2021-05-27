@@ -23,11 +23,13 @@ package com.cloudhopper.smpp.demo;
 import com.cloudhopper.commons.charset.CharsetUtil;
 import com.cloudhopper.commons.util.windowing.WindowFuture;
 import com.cloudhopper.smpp.SmppBindType;
+import com.cloudhopper.smpp.SmppConstants;
 import com.cloudhopper.smpp.SmppSession;
 import com.cloudhopper.smpp.SmppSessionConfiguration;
 import com.cloudhopper.smpp.impl.DefaultSmppClient;
 import com.cloudhopper.smpp.impl.DefaultSmppSessionHandler;
 import com.cloudhopper.smpp.pdu.*;
+import com.cloudhopper.smpp.tlv.Tlv;
 import com.cloudhopper.smpp.type.Address;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,12 +92,12 @@ public class ClientMain2 {
 
         SmppSessionConfiguration config0 = new SmppSessionConfiguration();
         config0.setWindowSize(1);
-        config0.setName("test-mk");
+        config0.setName("test_82");
         config0.setType(SmppBindType.TRANSCEIVER);
         config0.setHost("127.0.0.1");
-        config0.setSystemId("test8");
+        config0.setSystemId("test_82");
         config0.setPassword("888888");
-        config0.setPort(7776);
+        config0.setPort(17776);
 //        config0.setHost("209.58.162.117");
 //        config0.setPort(3777);
 //        config0.setHost("smpp.messaging-service.com");
@@ -146,19 +148,27 @@ public class ClientMain2 {
             SubmitSm submit0 = new SubmitSm();
 
             for (int i = 1; i < 2; i++) {
-                String text160 = "hello 0224 111";
-                byte[] textBytes = CharsetUtil.encode(text160, CharsetUtil.CHARSET_GSM);
+                String text160 = "합법적 인 카자흐어 인보이스가 테스트되는지 테스트";
+                byte[] textBytes = CharsetUtil.encode(text160, CharsetUtil.NAME_UCS_2);
+                //byte[] textBytes = CharsetUtil.encode(text160, CharsetUtil.NAME_GSM);
                 // add delivery receipt
                 //submit0.setRegisteredDelivery(SmppConstants.REGISTERED_DELIVERY_SMSC_RECEIPT_REQUESTED);
 
                 // address 包括发送方信息，接收方信息
-                submit0.setSourceAddress(new Address((byte) 0x01, (byte) 0x00, "haha"));
+                submit0.setSourceAddress(new Address((byte) 0x01, (byte) 0x00, ""));
                 //submit0.setDestAddress(new Address((byte) 0x01, (byte) 0x01, toList.get(1)));//Tk
-
+                submit0.setDataCoding(SmppConstants.DATA_CODING_UCS2);
                 submit0.setShortMessage(textBytes);
                 //接收方号码
-                submit0.setDestAddress(new Address((byte) 0x01, (byte) 0x01, "00919582473834111"));//Tk
+                submit0.setDestAddress(new Address((byte) 0x01, (byte) 0x01, "00821028749487"));//Tk
                 //logger.info("sendWindow.size: {}", session0.getSendWindow().getSize());
+                //代入一些可选参数
+                short pe_id  = 0x1400;
+                short template_id = 0x1401;
+                String entity_id_value = "12312312312368412";
+                String template_id_value = "yweyruywerywrewr";
+//                submit0.addOptionalParameter(new Tlv(pe_id, CharsetUtil.encode(entity_id_value, CharsetUtil.CHARSET_GSM), "111"));
+//                submit0.addOptionalParameter(new Tlv(template_id, CharsetUtil.encode(template_id_value, CharsetUtil.CHARSET_GSM), "222"));
                 SubmitSmResp submitResp = session0.submit(submit0, 10000);
                 logger.info("submitResponse:{}", submitResp);
             }

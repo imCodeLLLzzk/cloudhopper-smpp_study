@@ -40,6 +40,11 @@
             <version>${ch-commons-util.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.restcomm.smpp</groupId>
+            <artifactId>ch-commons-charset</artifactId>
+            <version>7.0.6</version>
+        </dependency>
+        <dependency>
             <groupId>com.cloudhopper</groupId>
             <artifactId>ch-commons-charset</artifactId>
             <version>${ch-commons-charset.version}</version>
